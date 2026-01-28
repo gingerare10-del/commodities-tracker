@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+    
+    <title>コモディティ・コンパス</title>
+    
+    <!-- Chart.js - pinned version from cdnjs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #0d0d12;
+            --card: #131318;
+            --card-border: #1e1e25;
+            --text: #d4d4da;
+            --text-muted: #6e6e7a;
+            --text-dim: #3e3e48;
+            
+            --leading: #2dd4a0;
+            --leading-soft: rgba(45, 212, 160, 0.08);
+            --weakening: #d4a72d;
+            --weakening-soft: rgba(212, 167, 45, 0.06);
+            --lagging: #d45d5d;
+            --lagging-soft: rgba(212, 93, 93, 0.06);
+            --improving: #5d8fd4;
+            --improving-soft: rgba(93, 143, 212, 0.08);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .app {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+        
+        @media (min-width: 768px) {
+            .app {
+                max-width: 1000px;
+                padding: 24px;
+                padding-bottom: 100px;
+            }
+        }
+        
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .logo {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--leading);
+            border-radius: 50%;
+        }
+        
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: var(--card);
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+        
+        .btn-icon:hover {
+            background: var(--card-border);
+            color: var(--text);
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        /* Chart */
+        .chart-card {
+            padding: 12px;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+        
+        .chart-title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .chart-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+        
+        .chart-help {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1px solid var(--card-border);
+            background: transparent;
+            color: var(--text-dim);
+            font-size: 0.65rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chart-help:hover {
+            border-color: var(--text-muted);
+            color: var(--text-muted);
+        }
+        
+        .chart-area {
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+        }
+        
+        .chart-container {
+            flex: 1;
+            min-width: 0;
+            position: relative;
+            height: 380px;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        
+        .shape-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 12px 0;
+            justify-content: center;
+            min-width: 90px;
+        }
+        
+        .shape-item {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        
+        .shape-icon {
+            font-size: 0.9rem;
+            width: 16px;
+            text-align: center;
+        }
+        
+        /* Chart Explainer Popup */
+        .chart-explainer {
+            position: absolute;
+            top: 50px;
+            left: 20px;
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 14px;
+            width: 260px;
+            z-index: 20;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            display: none;
+        }
+        
+        .chart-explainer.visible {
+            display: block;
+        }
+        
+        .explainer-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .explainer-axis {
+            margin-bottom: 10px;
+        }
+        
+        .explainer-axis:last-child {
+            margin-bottom: 0;
+        }
+        
+        .explainer-axis-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+        
+        .explainer-axis-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        
+        /* Distribution */
+        .distribution {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        
+        .dist-item {
+            text-align: center;
+            padding: 12px 8px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+        
+        .dist-num {
+            font-size: 1.5rem;
+            font-weight: 600;
+            line-height: 1;
+        }
+        
+        .dist-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        .dist-item.leading .dist-num { color: var(--leading); }
+        .dist-item.weakening .dist-num { color: var(--weakening); }
+        .dist-item.lagging .dist-num { color: var(--lagging); }
+        .dist-item.improving .dist-num { color: var(--improving); }
+        
+        /* Two Rankings Side by Side */
+        .rankings-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        @media (min-width: 768px) {
+            .rankings-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .ranking-card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .ranking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .ranking-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+        
+        .ranking-subtitle {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+        }
+        
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            background: var(--bg);
+            border-radius: 6px;
+        }
+        
+        .ranking-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .ranking-rank {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            width: 18px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .ranking-shape {
+            font-size: 0.7rem;
+            width: 16px;
+            text-align: center;
+        }
+        
+        .ranking-shape.leading { color: var(--leading); }
+        .ranking-shape.weakening { color: var(--weakening); }
+        .ranking-shape.lagging { color: var(--lagging); }
+        .ranking-shape.improving { color: var(--improving); }
+        
+        .ranking-name {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .ranking-value {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .ranking-value.up { color: var(--leading); }
+        .ranking-value.down { color: var(--lagging); }
+        
+        /* Data Sources */
+        .sources-card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .sources-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        
+        .source-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--bg);
+            border-radius: 8px;
+            margin-bottom: 6px;
+        }
+        
+        .source-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .source-icon {
+            font-size: 1rem;
+            width: 28px;
+            text-align: center;
+            margin-right: 12px;
+        }
+        
+        .source-info {
+            flex: 1;
+        }
+        
+        .source-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .source-desc {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        
+        .source-status {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+        }
+        
+        /* Bottom Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border-top: 1px solid var(--card-border);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .bottom-btn {
+            flex: 1;
+            max-width: 150px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: var(--bg);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+        
+        .bottom-btn:hover {
+            background: var(--card-border);
+            color: var(--text);
+        }
+        
+        /* Term Structure Section */
+        .term-structure-card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        /* Coming Soon Styles */
+        .coming-soon-card {
+            opacity: 0.85;
+        }
+        
+        .coming-soon-badge {
+            background: linear-gradient(135deg, #3a3a4a, #2a2a3a);
+            color: #8a8a9a;
+            font-size: 0.55rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .coming-soon-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            text-align: center;
+        }
+        
+        .coming-soon-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+        
+        .coming-soon-text {
+            color: #8a8a9a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin: 0 0 4px 0;
+        }
+        
+        .coming-soon-subtext {
+            color: #5a5a6a;
+            font-size: 0.7rem;
+            margin: 0;
+        }
+        
+        .term-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        
+        .term-title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .term-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+        
+        .term-help {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid var(--card-border);
+            background: transparent;
+            color: var(--text-dim);
+            font-size: 0.6rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .term-summary {
+            display: flex;
+            gap: 16px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .term-summary-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .term-summary-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .term-summary-dot.backwardation { background: var(--leading); }
+        .term-summary-dot.contango { background: var(--lagging); }
+        .term-summary-dot.flat { background: var(--text-dim); }
+        
+        .term-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        @media (min-width: 768px) {
+            .term-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        .term-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+        
+        .term-item-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .term-item-indicator {
+            font-size: 0.9rem;
+        }
+        
+        .term-item-indicator.contango { color: var(--lagging); }
+        .term-item-indicator.backwardation { color: var(--leading); }
+        .term-item-indicator.flat { color: var(--text-dim); }
+        
+        .term-item-name {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .term-item-right {
+            text-align: right;
+        }
+        
+        .term-item-spread {
+            font-size: 0.8rem;
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .term-item-spread.contango { color: var(--lagging); }
+        .term-item-spread.backwardation { color: var(--leading); }
+        .term-item-spread.flat { color: var(--text-muted); }
+        
+        .term-item-label {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+        
+        .term-seasonal-flag {
+            font-size: 0.6rem;
+            color: var(--weakening);
+            margin-left: 4px;
+            cursor: help;
+        }
+        
+        /* Term Structure Explainer */
+        .term-explainer {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            width: 320px;
+            max-width: 90vw;
+            z-index: 80;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            display: none;
+        }
+        
+        .term-explainer.visible {
+            display: block;
+        }
+        
+        .term-explainer-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 79;
+            display: none;
+        }
+        
+        .term-explainer-backdrop.visible {
+            display: block;
+        }
+        
+        .term-explainer-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .term-explainer-item {
+            margin-bottom: 12px;
+        }
+        
+        .term-explainer-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .term-explainer-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .term-explainer-label .indicator { font-size: 0.85rem; }
+        .term-explainer-label.contango { color: var(--lagging); }
+        .term-explainer-label.backwardation { color: var(--leading); }
+        
+        .term-explainer-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        
+        .term-explainer-note {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--card-border);
+            font-style: italic;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+        }
+        
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.2s;
+        }
+        
+        .modal-overlay.open .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .modal-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: none;
+            background: var(--bg);
+            color: var(--text-muted);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-close:hover {
+            background: var(--card-border);
+            color: var(--text);
+        }
+        
+        .modal-section {
+            margin-bottom: 16px;
+        }
+        
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .modal-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .modal p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        
+        .modal p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .modal ul {
+            list-style: none;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        .modal li {
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+        
+        .modal li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--text-dim);
+        }
+        
+        .modal-footer {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--card-border);
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header>
+            <div class="logo">コモディティ・コンパス</div>
+            <div class="header-right">
+                <div class="status">
+                    <span class="status-dot"></span>
+                    <span id="updateTime">読込中...</span>
+                </div>
+                <a href="index.html" class="btn-icon" style="text-decoration:none;">EN</a>
+                <button class="btn-icon" onclick="openModal()">?</button>
+            </div>
+        </header>
+        
+        <div class="card chart-card">
+            <div class="chart-header">
+                <div class="chart-title-row">
+                    <span class="chart-title">相対ローテーション</span>
+                    <button class="chart-help" onclick="toggleExplainer()">?</button>
+                </div>
+            </div>
+            <div class="chart-area">
+                <div class="chart-container">
+                    <canvas id="chart"></canvas>
+                    <div class="chart-explainer" id="explainer">
+                        <div class="explainer-title">チャートの見方</div>
+                        <div class="explainer-axis">
+                            <div class="explainer-axis-label">→ 横軸（強さ）</div>
+                            <div class="explainer-axis-desc">平均と比較して、この商品はアウトパフォームしているか？ 右側 = 他より好調</div>
+                        </div>
+                        <div class="explainer-axis">
+                            <div class="explainer-axis-label">↑ 縦軸（モメンタム）</div>
+                            <div class="explainer-axis-desc">そのパフォーマンスは改善中か悪化中か？ 上 = 勢いが増している</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="shape-legend">
+                    <span class="shape-item"><span class="shape-icon">●</span> エネルギー</span>
+                    <span class="shape-item"><span class="shape-icon">◆</span> 貴金属</span>
+                    <span class="shape-item"><span class="shape-icon">■</span> 産業用金属</span>
+                    <span class="shape-item"><span class="shape-icon">▲</span> 穀物</span>
+                    <span class="shape-item"><span class="shape-icon">✦</span> ソフト</span>
+                    <span class="shape-item"><span class="shape-icon">▼</span> 畜産</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="distribution">
+                <div class="dist-item leading">
+                    <div class="dist-num" id="qLeading">-</div>
+                    <div class="dist-label">先導</div>
+                </div>
+                <div class="dist-item weakening">
+                    <div class="dist-num" id="qWeakening">-</div>
+                    <div class="dist-label">弱体化</div>
+                </div>
+                <div class="dist-item lagging">
+                    <div class="dist-num" id="qLagging">-</div>
+                    <div class="dist-label">劣後</div>
+                </div>
+                <div class="dist-item improving">
+                    <div class="dist-num" id="qImproving">-</div>
+                    <div class="dist-label">改善中</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="rankings-grid">
+            <div class="ranking-card">
+                <div class="ranking-header">
+                    <span class="ranking-title">強さ順</span>
+                </div>
+                <div class="ranking-list" id="strengthList"></div>
+            </div>
+            <div class="ranking-card">
+                <div class="ranking-header">
+                    <span class="ranking-title">モメンタム順</span>
+                </div>
+                <div class="ranking-list" id="momentumList"></div>
+            </div>
+        </div>
+        
+        <div class="sources-card">
+            <div class="sources-title">データソース</div>
+            <div class="source-item">
+                <span class="source-icon">📈</span>
+                <div class="source-info">
+                    <div class="source-name">Yahoo Finance</div>
+                    <div class="source-desc">先物価格</div>
+                </div>
+                <span class="source-status">15分遅延</span>
+            </div>
+            <div class="source-item">
+                <span class="source-icon">📊</span>
+                <div class="source-info">
+                    <div class="source-name">RRG計算</div>
+                    <div class="source-desc">パーセンタイル順位</div>
+                </div>
+                <span class="source-status">252日間</span>
+            </div>
+        </div>
+        
+        <!-- Term Structure Section - Coming Soon -->
+        <div class="term-structure-card coming-soon-card">
+            <div class="term-header">
+                <div class="term-title-row">
+                    <span class="term-title">期間構造</span>
+                    <span class="coming-soon-badge">近日公開</span>
+                </div>
+            </div>
+            <div class="coming-soon-content">
+                <div class="coming-soon-icon">📈</div>
+                <p class="coming-soon-text">コンタンゴ＆バックワーデーション分析</p>
+                <p class="coming-soon-subtext">商品全体の先物カーブシグナルを追跡</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bottom-bar">
+        <button class="bottom-btn" onclick="share()">
+            <span>↗</span> 共有
+        </button>
+        <button class="bottom-btn" onclick="openModal()">
+            <span>ℹ</span> 情報
+        </button>
+    </div>
+    
+    <div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">コモディティ・コンパスについて</span>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            
+            <div class="modal-section">
+                <div class="modal-section-title">⚠️ 免責事項</div>
+                <p>これは情報提供のみを目的とした<strong>可視化ツール</strong>です。</p>
+            </div>
+            
+            <div class="modal-section">
+                <div class="modal-section-title">以下ではありません：</div>
+                <ul>
+                    <li>投資アドバイス</li>
+                    <li>価格予測</li>
+                    <li>取引判断の根拠</li>
+                </ul>
+            </div>
+            
+            <div class="modal-section">
+                <div class="modal-section-title">仕組み</div>
+                <ul>
+                    <li>各商品をグループ平均と比較</li>
+                    <li>強さ = 現在の相対パフォーマンス</li>
+                    <li>モメンタム = パフォーマンスが改善中か低下中か</li>
+                    <li>252営業日のパーセンタイル順位</li>
+                </ul>
+            </div>
+            
+            <div class="modal-footer">
+                多くの見方の一つです。ご自身で調査してください。
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Security: HTML sanitizer to prevent XSS attacks
+        function sanitizeHTML(str) {
+            if (typeof str !== 'string') return str;
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        
+        // Security: Sanitize number to prevent injection
+        function sanitizeNumber(num) {
+            const parsed = parseFloat(num);
+            return isNaN(parsed) ? 0 : parsed;
+        }
+        
+        const QUADRANT_COLORS = {
+            leading: '#2dd4a0',
+            weakening: '#d4a72d',
+            lagging: '#d45d5d',
+            improving: '#5d8fd4'
+        };
+        
+        const SHAPES = {
+            energy: '●',
+            precious_metals: '◆',
+            industrial: '■',
+            grains: '▲',
+            softs: '✦',
+            livestock: '▼'
+        };
+        
+        const CATEGORY_NAMES = {
+            energy: 'エネルギー',
+            precious_metals: '貴金属',
+            industrial: '産業用金属',
+            grains: '穀物',
+            softs: 'ソフト',
+            livestock: '畜産'
+        };
+        
+        // Security: Whitelist of allowed quadrant values
+        const ALLOWED_QUADRANTS = ['leading', 'weakening', 'lagging', 'improving'];
+        const ALLOWED_CATEGORIES = ['energy', 'precious_metals', 'industrial', 'grains', 'softs', 'livestock'];
+        
+        function validateQuadrant(q) {
+            return ALLOWED_QUADRANTS.includes(q) ? q : 'lagging';
+        }
+        
+        function validateCategory(c) {
+            return ALLOWED_CATEGORIES.includes(c) ? c : 'energy';
+        }
+        
+        let chart = null;
+        let data = null;
+        
+        async function load() {
+            try {
+                const res = await fetch('compass.json');
+                data = await res.json();
+                render();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        
+        function render() {
+            try { renderChart(); } catch(e) { console.error('Chart error:', e); }
+            try { renderDistribution(); } catch(e) { console.error('Distribution error:', e); }
+            try { renderRankings(); } catch(e) { console.error('Rankings error:', e); }
+            try { renderTime(); } catch(e) { console.error('Time error:', e); }
+        }
+        
+        function getChartBounds(commodities) {
+            const xs = commodities.map(c => c.x);
+            const ys = commodities.map(c => c.y);
+            
+            const minX = Math.min(...xs);
+            const maxX = Math.max(...xs);
+            const minY = Math.min(...ys);
+            const maxY = Math.max(...ys);
+            
+            // Add padding (15%)
+            const padX = (maxX - minX) * 0.15 || 10;
+            const padY = (maxY - minY) * 0.15 || 10;
+            
+            // Ensure we include 100 (center line) and have some minimum range
+            let left = Math.min(minX - padX, 95);
+            let right = Math.max(maxX + padX, 105);
+            let bottom = Math.min(minY - padY, 95);
+            let top = Math.max(maxY + padY, 105);
+            
+            // Make it square-ish (same range for both axes)
+            const rangeX = right - left;
+            const rangeY = top - bottom;
+            const maxRange = Math.max(rangeX, rangeY);
+            
+            const centerX = (left + right) / 2;
+            const centerY = (top + bottom) / 2;
+            
+            left = centerX - maxRange / 2;
+            right = centerX + maxRange / 2;
+            bottom = centerY - maxRange / 2;
+            top = centerY + maxRange / 2;
+            
+            return { minX: left, maxX: right, minY: bottom, maxY: top };
+        }
+        
+        function renderChart() {
+            const ctx = document.getElementById('chart').getContext('2d');
+            
+            if (chart) chart.destroy();
+            
+            // Safety check for empty data
+            if (!data.commodities || data.commodities.length === 0) {
+                console.warn('No commodities data to render chart');
+                return;
+            }
+            
+            const bounds = getChartBounds(data.commodities);
+            
+            // Custom plugin to draw shapes
+            const shapePlugin = {
+                id: 'shapePoints',
+                afterDatasetsDraw: (chart) => {
+                    const ctx = chart.ctx;
+                    const dataset = chart.data.datasets.find(d => d.label === 'Commodities');
+                    if (!dataset) return;
+                    
+                    const meta = chart.getDatasetMeta(chart.data.datasets.indexOf(dataset));
+                    
+                    meta.data.forEach((point, i) => {
+                        const c = dataset.data[i].c;
+                        if (!c) return;
+                        
+                        const x = point.x;
+                        const y = point.y;
+                        const color = QUADRANT_COLORS[c.quadrant];
+                        const shape = SHAPES[c.category];
+                        
+                        ctx.save();
+                        ctx.font = '600 17px -apple-system, BlinkMacSystemFont, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = color;
+                        ctx.fillText(shape, x, y);
+                        ctx.restore();
+                    });
+                }
+            };
+            
+            // Quadrant background plugin
+            const quadrantPlugin = {
+                id: 'quadrantBackground',
+                beforeDraw: (chart) => {
+                    const {ctx, scales: {x, y}} = chart;
+                    const cx = x.getPixelForValue(100);
+                    const cy = y.getPixelForValue(100);
+                    
+                    // Only draw if 100 is within visible range
+                    if (cx >= x.left && cx <= x.right && cy >= y.top && cy <= y.bottom) {
+                        ctx.fillStyle = 'rgba(45, 212, 160, 0.05)';
+                        ctx.fillRect(cx, y.top, x.right - cx, cy - y.top);
+                        
+                        ctx.fillStyle = 'rgba(212, 167, 45, 0.04)';
+                        ctx.fillRect(cx, cy, x.right - cx, y.bottom - cy);
+                        
+                        ctx.fillStyle = 'rgba(212, 93, 93, 0.04)';
+                        ctx.fillRect(x.left, cy, cx - x.left, y.bottom - cy);
+                        
+                        ctx.fillStyle = 'rgba(93, 143, 212, 0.05)';
+                        ctx.fillRect(x.left, y.top, cx - x.left, cy - y.top);
+                        
+                        ctx.font = '600 9px -apple-system, BlinkMacSystemFont, sans-serif';
+                        ctx.textAlign = 'center';
+                        
+                        ctx.fillStyle = 'rgba(45, 212, 160, 0.5)';
+                        ctx.fillText('先導', (cx + x.right) / 2, y.top + 14);
+                        
+                        ctx.fillStyle = 'rgba(212, 167, 45, 0.5)';
+                        ctx.fillText('弱体化', (cx + x.right) / 2, y.bottom - 8);
+                        
+                        ctx.fillStyle = 'rgba(212, 93, 93, 0.5)';
+                        ctx.fillText('劣後', (x.left + cx) / 2, y.bottom - 8);
+                        
+                        ctx.fillStyle = 'rgba(93, 143, 212, 0.5)';
+                        ctx.fillText('改善中', (x.left + cx) / 2, y.top + 14);
+                    }
+                }
+            };
+            
+            // Add small jitter to prevent overlapping points
+            function addJitter(commodities) {
+                const jittered = [];
+                const positions = {};
+                
+                commodities.forEach(c => {
+                    // Round to create position key
+                    const key = `${Math.round(c.x)},${Math.round(c.y)}`;
+                    
+                    if (!positions[key]) {
+                        positions[key] = 0;
+                    }
+                    
+                    // Add small offset based on how many points are at this position
+                    const offset = positions[key] * 1.5;
+                    const angle = positions[key] * 137.5 * Math.PI / 180; // Golden angle for distribution
+                    
+                    jittered.push({
+                        x: c.x + Math.cos(angle) * offset,
+                        y: c.y + Math.sin(angle) * offset,
+                        c: c
+                    });
+                    
+                    positions[key]++;
+                });
+                
+                return jittered;
+            }
+            
+            const points = addJitter(data.commodities);
+            
+            chart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Commodities',
+                        data: points,
+                        backgroundColor: 'transparent',
+                        borderColor: 'transparent',
+                        pointRadius: 14,
+                        pointHoverRadius: 18
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 24, right: 20, bottom: 8, left: 8 } },
+                    scales: {
+                        x: {
+                            min: bounds.minX,
+                            max: bounds.maxX,
+                            grid: { 
+                                color: ctx => Math.abs(ctx.tick.value - 100) < 1 ? '#2a2a34' : '#18181e',
+                                lineWidth: 1
+                            },
+                            ticks: { display: false },
+                            title: { 
+                                display: true, 
+                                text: '← 弱い          強さ          強い →', 
+                                color: '#4a4a58', 
+                                font: { size: 10, weight: '500' },
+                                padding: { top: 8 }
+                            }
+                        },
+                        y: {
+                            min: bounds.minY,
+                            max: bounds.maxY,
+                            grid: { 
+                                color: ctx => Math.abs(ctx.tick.value - 100) < 1 ? '#2a2a34' : '#18181e',
+                                lineWidth: 1
+                            },
+                            ticks: { display: false },
+                            title: { 
+                                display: true, 
+                                text: '← 低下中          モメンタム          上昇中 →', 
+                                color: '#4a4a58', 
+                                font: { size: 10, weight: '500' },
+                                padding: { bottom: 8 }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: '#1a1a22',
+                            borderColor: '#2a2a34',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            titleFont: { size: 13, weight: '600' },
+                            bodyFont: { size: 12 },
+                            mode: 'nearest',
+                            intersect: true,
+                            callbacks: {
+                                title: ctx => ctx[0]?.raw?.c?.name || '',
+                                label: ctx => {
+                                    const c = ctx.raw.c;
+                                    if (!c) return '';
+                                    
+                                    const QUADRANT_NAMES_JP = {
+                                        leading: '先導',
+                                        weakening: '弱体化',
+                                        lagging: '劣後',
+                                        improving: '改善中'
+                                    };
+                                    const quadrant = QUADRANT_NAMES_JP[c.quadrant] || c.quadrant;
+                                    const lines = [
+                                        `${quadrant} · ${CATEGORY_NAMES[c.category]}`
+                                    ];
+                                    
+                                    if (c.price !== undefined) {
+                                        const sign = c.price_change_pct >= 0 ? '+' : '';
+                                        lines.push(`$${c.price.toFixed(2)} (${sign}${c.price_change_pct.toFixed(2)}%)`);
+                                    }
+                                    
+                                    return lines;
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [quadrantPlugin, shapePlugin]
+            });
+        }
+        
+        function renderDistribution() {
+            document.getElementById('qLeading').textContent = data.summary.leading;
+            document.getElementById('qWeakening').textContent = data.summary.weakening;
+            document.getElementById('qLagging').textContent = data.summary.lagging;
+            document.getElementById('qImproving').textContent = data.summary.improving;
+        }
+        
+        function renderRankings() {
+            // Sort by strength (x value, descending)
+            const byStrength = [...data.commodities].sort((a, b) => b.x - a.x);
+            
+            // Sort by momentum (y value, descending)
+            const byMomentum = [...data.commodities].sort((a, b) => b.y - a.y);
+            
+            document.getElementById('strengthList').innerHTML = byStrength.map((c, i) => {
+                const val = sanitizeNumber(c.x) - 100;
+                const cls = val >= 0 ? 'up' : 'down';
+                const quadrant = validateQuadrant(c.quadrant);
+                const category = validateCategory(c.category);
+                const name = sanitizeHTML(c.name);
+                return `
+                <div class="ranking-item">
+                    <div class="ranking-left">
+                        <span class="ranking-rank">${i + 1}</span>
+                        <span class="ranking-shape ${quadrant}">${SHAPES[category]}</span>
+                        <span class="ranking-name">${name}</span>
+                    </div>
+                    <span class="ranking-value ${cls}">${val >= 0 ? '+' : ''}${val.toFixed(1)}</span>
+                </div>
+            `}).join('');
+            
+            document.getElementById('momentumList').innerHTML = byMomentum.map((c, i) => {
+                const val = sanitizeNumber(c.y) - 100;
+                const cls = val >= 0 ? 'up' : 'down';
+                const quadrant = validateQuadrant(c.quadrant);
+                const category = validateCategory(c.category);
+                const name = sanitizeHTML(c.name);
+                return `
+                <div class="ranking-item">
+                    <div class="ranking-left">
+                        <span class="ranking-rank">${i + 1}</span>
+                        <span class="ranking-shape ${quadrant}">${SHAPES[category]}</span>
+                        <span class="ranking-name">${name}</span>
+                    </div>
+                    <span class="ranking-value ${cls}">${val >= 0 ? '+' : ''}${val.toFixed(1)}</span>
+                </div>
+            `}).join('');
+        }
+        
+        function renderTime() {
+            const d = new Date(data.generated_at);
+            const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            document.getElementById('updateTime').textContent = time;
+        }
+        
+        function toggleExplainer() {
+            document.getElementById('explainer').classList.toggle('visible');
+        }
+        
+        function openModal() {
+            document.getElementById('modal').classList.add('open');
+        }
+        
+        function closeModal() {
+            document.getElementById('modal').classList.remove('open');
+        }
+        
+        function closeModalOutside(e) {
+            if (e.target.id === 'modal') closeModal();
+        }
+        
+        function share() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Commodities Compass',
+                    text: 'See which commodities are leading and lagging',
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert('Link copied!');
+            }
+        }
+        
+        // Close explainer when clicking outside
+        document.addEventListener('click', (e) => {
+            const explainer = document.getElementById('explainer');
+            const helpBtn = document.querySelector('.chart-help');
+            if (!explainer.contains(e.target) && e.target !== helpBtn) {
+                explainer.classList.remove('visible');
+            }
+        });
+        
+        load();
+        setInterval(load, 5 * 60 * 1000);
+    </script>
+</body>
+</html>

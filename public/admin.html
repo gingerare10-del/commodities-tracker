@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Commodities Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, monospace;
+            background: #0a0a0f;
+            color: #f0f0f0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { font-size: 1.5rem; margin-bottom: 30px; border-bottom: 1px solid #2a2a3a; padding-bottom: 15px; }
+        .section {
+            background: #1a1a24;
+            border: 1px solid #2a2a3a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 15px;
+        }
+        .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .metric { text-align: center; }
+        .metric-value { font-size: 2rem; font-weight: 600; }
+        .metric-label { font-size: 0.75rem; color: #888; }
+        .ok { color: #22c55e; }
+        .warning { color: #eab308; }
+        .critical { color: #ef4444; }
+        .bar { height: 8px; background: #2a2a3a; border-radius: 4px; margin: 10px 0; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 4px; }
+        .bar-fill.ok { background: #22c55e; }
+        .bar-fill.warning { background: #eab308; }
+        .bar-fill.critical { background: #ef4444; }
+        .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2a2a3a; }
+        .row:last-child { border-bottom: none; }
+        .label { color: #888; }
+        .value { font-weight: 500; }
+        .value.on { color: #22c55e; }
+        .value.off { color: #ef4444; }
+        .alert { padding: 12px; border-radius: 6px; margin-bottom: 10px; }
+        .alert.info { background: rgba(59,130,246,0.1); border: 1px solid #3b82f6; }
+        .alert.warning { background: rgba(234,179,8,0.1); border: 1px solid #eab308; }
+        .alert.critical { background: rgba(239,68,68,0.1); border: 1px solid #ef4444; }
+        .no-alerts { color: #22c55e; text-align: center; padding: 20px; }
+        .note { text-align: center; color: #555; font-size: 0.8rem; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Commodities Tracker - Admin</h1>
+        
+        <div class="section">
+            <div class="section-title">Current Metrics</div>
+            <div class="metric-grid">
+                <div class="metric">
+                    <div class="metric-value" id="visitors">-</div>
+                    <div class="metric-label">Visitors/Day (avg)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="apiCalls">-</div>
+                    <div class="metric-label">API Calls Today</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="errorRate">-</div>
+                    <div class="metric-label">Error Rate (7d)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Threshold Status</div>
+            
+            <div class="row">
+                <span class="label">Visitors</span>
+                <span class="value" id="visitorsLevel">-</span>
+            </div>
+            <div class="bar"><div class="bar-fill" id="visitorsBar" style="width: 0%"></div></div>
+            
+            <div class="row">
+                <span class="label">API Calls</span>
+                <span class="value" id="apiLevel">-</span>
+            </div>
+            <div class="bar"><div class="bar-fill" id="apiBar" style="width: 0%"></div></div>
+            
+            <div class="row">
+                <span class="label">Errors</span>
+                <span class="value" id="errorLevel">-</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Display Settings</div>
+            <div class="row">
+                <span class="label">Show Prices</span>
+                <span class="value" id="showPrices">-</span>
+            </div>
+            <div class="row">
+                <span class="label">Show Percentages</span>
+                <span class="value" id="showPercentages">-</span>
+            </div>
+            <div class="row">
+                <span class="label">Update Interval</span>
+                <span class="value" id="updateInterval">-</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Alerts</div>
+            <div id="alerts">
+                <div class="no-alerts">No alerts - all systems normal</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Thresholds Reference</div>
+            <div class="row"><span class="label">Visitors - Notice</span><span class="value">100/day</span></div>
+            <div class="row"><span class="label">Visitors - Attention</span><span class="value">1,000/day</span></div>
+            <div class="row"><span class="label">Visitors - Warning</span><span class="value">5,000/day</span></div>
+            <div class="row"><span class="label">Visitors - Critical (auto-hide prices)</span><span class="value">10,000/day</span></div>
+            <div class="row"><span class="label">API Calls - Warning</span><span class="value">600/day</span></div>
+            <div class="row"><span class="label">API Calls - Critical</span><span class="value">800/day</span></div>
+        </div>
+        
+        <p class="note">Data from status.json - refreshes every 60s</p>
+    </div>
+    
+    <script>
+        async function loadStatus() {
+            try {
+                // In production, this would load from an API endpoint
+                // For now, we'll show placeholder data
+                // The actual data comes from the Python monitor
+                
+                const response = await fetch('status.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    updateUI(data);
+                } else {
+                    showDefaults();
+                }
+            } catch (e) {
+                showDefaults();
+            }
+        }
+        
+        function showDefaults() {
+            document.getElementById('visitors').textContent = '0';
+            document.getElementById('apiCalls').textContent = '0';
+            document.getElementById('errorRate').textContent = '0%';
+            document.getElementById('visitorsLevel').textContent = 'OK';
+            document.getElementById('visitorsLevel').className = 'value ok';
+            document.getElementById('apiLevel').textContent = 'OK';
+            document.getElementById('apiLevel').className = 'value ok';
+            document.getElementById('errorLevel').textContent = 'OK';
+            document.getElementById('errorLevel').className = 'value ok';
+            document.getElementById('showPrices').textContent = 'ON';
+            document.getElementById('showPrices').className = 'value on';
+            document.getElementById('showPercentages').textContent = 'ON';
+            document.getElementById('showPercentages').className = 'value on';
+            document.getElementById('updateInterval').textContent = '15 min';
+            
+            document.getElementById('visitorsBar').style.width = '1%';
+            document.getElementById('visitorsBar').className = 'bar-fill ok';
+            document.getElementById('apiBar').style.width = '1%';
+            document.getElementById('apiBar').className = 'bar-fill ok';
+        }
+        
+        function updateUI(data) {
+            // Update metrics
+            if (data.metrics) {
+                document.getElementById('visitors').textContent = data.metrics.daily_visitors_avg || 0;
+                document.getElementById('apiCalls').textContent = data.metrics.api_calls_today || 0;
+                document.getElementById('errorRate').textContent = (data.metrics.error_rate_7d || 0) + '%';
+            }
+            
+            // Update levels
+            if (data.levels) {
+                for (const [key, level] of Object.entries(data.levels)) {
+                    const el = document.getElementById(key + 'Level');
+                    if (el) {
+                        el.textContent = level.toUpperCase();
+                        el.className = 'value ' + level;
+                    }
+                }
+            }
+            
+            // Update display settings
+            if (data.display_settings) {
+                const prices = data.display_settings.show_prices;
+                const pct = data.display_settings.show_percentages;
+                document.getElementById('showPrices').textContent = prices ? 'ON' : 'OFF';
+                document.getElementById('showPrices').className = 'value ' + (prices ? 'on' : 'off');
+                document.getElementById('showPercentages').textContent = pct ? 'ON' : 'OFF';
+                document.getElementById('showPercentages').className = 'value ' + (pct ? 'on' : 'off');
+                document.getElementById('updateInterval').textContent = (data.display_settings.update_interval || 15) + ' min';
+            }
+            
+            // Update alerts
+            if (data.alerts && data.alerts.length > 0) {
+                document.getElementById('alerts').innerHTML = data.alerts.map(a => 
+                    `<div class="alert ${a.severity}">${a.message}</div>`
+                ).join('');
+            }
+        }
+        
+        loadStatus();
+        setInterval(loadStatus, 60000);
+    </script>
+</body>
+</html>

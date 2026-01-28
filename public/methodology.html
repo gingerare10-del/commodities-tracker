@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Methodology · Commodities Compass</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #e8e8ed;
+            line-height: 1.7;
+            padding: 48px 24px;
+        }
+        .container { max-width: 640px; margin: 0 auto; }
+        h1 { font-size: 1.5rem; margin-bottom: 8px; }
+        .back { color: #6b6b7b; font-size: 0.875rem; text-decoration: none; display: inline-block; margin-bottom: 24px; }
+        .back:hover { color: #e8e8ed; }
+        h2 { font-size: 1rem; margin: 32px 0 12px; color: #a8a8b8; }
+        p { margin-bottom: 16px; color: #b8b8c8; }
+        ul { margin: 0 0 16px 20px; color: #b8b8c8; }
+        li { margin-bottom: 8px; }
+        code { background: #1a1a24; padding: 2px 6px; border-radius: 4px; font-size: 0.875rem; }
+        .note { background: #13131a; border-left: 3px solid #3b82f6; padding: 16px; margin: 24px 0; border-radius: 0 8px 8px 0; }
+        .note p { margin: 0; font-size: 0.875rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back">← Back to Compass</a>
+        <h1>Methodology</h1>
+        
+        <h2>What This Shows</h2>
+        <p>The Commodities Compass visualizes which commodities are outperforming or underperforming relative to each other. It's a snapshot of current trends, not a prediction of future prices.</p>
+        
+        <h2>How It Works</h2>
+        <p>We track 20 major commodity futures across energy, metals, grains, softs, and livestock. For each commodity, we calculate:</p>
+        <ul>
+            <li><strong>Relative Strength (X-axis)</strong> — Is this commodity outperforming or underperforming the average? Uses percentile ranking over 252 trading days.</li>
+            <li><strong>Momentum (Y-axis)</strong> — Is that relative performance improving or fading? Also percentile-ranked.</li>
+        </ul>
+        
+        <h2>The Quadrants</h2>
+        <ul>
+            <li><strong>Leading</strong> (top-right) — Outperforming and momentum is positive</li>
+            <li><strong>Weakening</strong> (bottom-right) — Still outperforming but losing steam</li>
+            <li><strong>Lagging</strong> (bottom-left) — Underperforming and momentum is negative</li>
+            <li><strong>Improving</strong> (top-left) — Still underperforming but starting to turn</li>
+        </ul>
+        <p>Commodities tend to rotate clockwise through these quadrants over time.</p>
+        
+        <h2>Term Structure</h2>
+        <p>For energy and metals, we also show whether the futures curve is in <strong>backwardation</strong> (near-term prices higher than far-term, often bullish) or <strong>contango</strong> (far-term higher, often bearish for holders).</p>
+        
+        <h2>Parameters</h2>
+        <ul>
+            <li>RS-Ratio smoothing: 100 periods</li>
+            <li>RS-Momentum: 35-period rate of change</li>
+            <li>Percentile window: 252 trading days (~1 year)</li>
+            <li>Benchmark: Equal-weight geometric mean of all 20 commodities</li>
+        </ul>
+        
+        <div class="note">
+            <p>This methodology is based on Relative Rotation Graphs (RRG), developed by Julius de Kempenaer. We use percentile ranking instead of z-scores to handle the non-normal distribution of commodity returns.</p>
+        </div>
+        
+        <h2>Data</h2>
+        <p>Prices from Yahoo Finance. Delayed 15+ minutes. Updates every 15 minutes during market hours.</p>
+        
+        <h2>Limitations</h2>
+        <p>This is a visualization tool. It shows what's happening, not what will happen. Past relative performance does not predict future returns. Use it as one input among many.</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,750 @@
+{
+  "generated_at": "2026-01-28T12:35:56.874677",
+  "data_start": "2025-01-27T00:00:00-05:00",
+  "data_end": "2026-01-27T00:00:00-05:00",
+  "trading_days": 252,
+  "parameters": {
+    "rs_ratio_period": 100,
+    "rs_momentum_period": 35,
+    "tail_length": 5,
+    "normalization": "percentile_rank"
+  },
+  "summary": {
+    "leading": 0,
+    "weakening": 5,
+    "lagging": 14,
+    "improving": 0
+  },
+  "commodities": [
+    {
+      "symbol": "NG",
+      "name": "Natural Gas",
+      "short": "NatGas",
+      "category": "energy",
+      "quadrant": "weakening",
+      "x": 110.6,
+      "y": 87.5,
+      "tail": [
+        {
+          "x": 100.2,
+          "y": 86.0
+        },
+        {
+          "x": 101.2,
+          "y": 86.3
+        },
+        {
+          "x": 102.2,
+          "y": 87.3
+        },
+        {
+          "x": 108.4,
+          "y": 88.4
+        },
+        {
+          "x": 110.6,
+          "y": 87.5
+        }
+      ],
+      "pct_ratio": 60.6,
+      "pct_momentum": 37.5,
+      "strength_label": "strong",
+      "momentum_label": "fading",
+      "price": 3.8,
+      "price_change": -3.0,
+      "price_change_pct": -44.12
+    },
+    {
+      "symbol": "GC",
+      "name": "Gold",
+      "short": "Gold",
+      "category": "precious_metals",
+      "quadrant": "weakening",
+      "x": 110.6,
+      "y": 96.6,
+      "tail": [
+        {
+          "x": 109.9,
+          "y": 95.7
+        },
+        {
+          "x": 110.1,
+          "y": 96.0
+        },
+        {
+          "x": 110.2,
+          "y": 96.2
+        },
+        {
+          "x": 110.4,
+          "y": 96.4
+        },
+        {
+          "x": 110.6,
+          "y": 96.6
+        }
+      ],
+      "pct_ratio": 60.6,
+      "pct_momentum": 46.6,
+      "strength_label": "strong",
+      "momentum_label": "steady",
+      "price": 5234.1,
+      "price_change": 154.4,
+      "price_change_pct": 3.04
+    },
+    {
+      "symbol": "SI",
+      "name": "Silver",
+      "short": "Silver",
+      "category": "precious_metals",
+      "quadrant": "weakening",
+      "x": 110.6,
+      "y": 96.6,
+      "tail": [
+        {
+          "x": 109.9,
+          "y": 95.7
+        },
+        {
+          "x": 110.1,
+          "y": 96.0
+        },
+        {
+          "x": 110.2,
+          "y": 96.2
+        },
+        {
+          "x": 110.4,
+          "y": 96.4
+        },
+        {
+          "x": 110.6,
+          "y": 96.6
+        }
+      ],
+      "pct_ratio": 60.6,
+      "pct_momentum": 46.6,
+      "strength_label": "strong",
+      "momentum_label": "steady",
+      "price": 115.14,
+      "price_change": 0.06,
+      "price_change_pct": 0.06
+    },
+    {
+      "symbol": "PA",
+      "name": "Palladium",
+      "short": "Pallad",
+      "category": "precious_metals",
+      "quadrant": "weakening",
+      "x": 110.6,
+      "y": 96.6,
+      "tail": [
+        {
+          "x": 109.9,
+          "y": 87.7
+        },
+        {
+          "x": 110.1,
+          "y": 90.3
+        },
+        {
+          "x": 110.2,
+          "y": 95.8
+        },
+        {
+          "x": 110.4,
+          "y": 96.4
+        },
+        {
+          "x": 110.6,
+          "y": 96.6
+        }
+      ],
+      "pct_ratio": 60.6,
+      "pct_momentum": 46.6,
+      "strength_label": "strong",
+      "momentum_label": "steady",
+      "price": 1983.0,
+      "price_change": -186.9,
+      "price_change_pct": -8.61
+    },
+    {
+      "symbol": "HG",
+      "name": "Copper",
+      "short": "Copper",
+      "category": "industrial",
+      "quadrant": "weakening",
+      "x": 110.6,
+      "y": 95.4,
+      "tail": [
+        {
+          "x": 109.9,
+          "y": 92.9
+        },
+        {
+          "x": 110.1,
+          "y": 93.5
+        },
+        {
+          "x": 110.2,
+          "y": 94.2
+        },
+        {
+          "x": 110.4,
+          "y": 94.8
+        },
+        {
+          "x": 110.6,
+          "y": 95.4
+        }
+      ],
+      "pct_ratio": 60.6,
+      "pct_momentum": 45.4,
+      "strength_label": "strong",
+      "momentum_label": "steady",
+      "price": 5.99,
+      "price_change": 0.01,
+      "price_change_pct": 0.09
+    },
+    {
+      "symbol": "KC",
+      "name": "Coffee",
+      "short": "Coffee",
+      "category": "softs",
+      "quadrant": "lagging",
+      "x": 94.6,
+      "y": 75.5,
+      "tail": [
+        {
+          "x": 97.8,
+          "y": 77.9
+        },
+        {
+          "x": 96.8,
+          "y": 77.4
+        },
+        {
+          "x": 95.8,
+          "y": 76.5
+        },
+        {
+          "x": 94.8,
+          "y": 76.0
+        },
+        {
+          "x": 94.6,
+          "y": 75.5
+        }
+      ],
+      "pct_ratio": 44.6,
+      "pct_momentum": 25.5,
+      "strength_label": "neutral",
+      "momentum_label": "fading",
+      "price": 369.5,
+      "price_change": 13.25,
+      "price_change_pct": 3.72
+    },
+    {
+      "symbol": "ZM",
+      "name": "Soybean Meal",
+      "short": "SoyMeal",
+      "category": "grains",
+      "quadrant": "lagging",
+      "x": 86.3,
+      "y": 78.7,
+      "tail": [
+        {
+          "x": 88.9,
+          "y": 80.4
+        },
+        {
+          "x": 87.9,
+          "y": 79.8
+        },
+        {
+          "x": 87.3,
+          "y": 79.3
+        },
+        {
+          "x": 86.4,
+          "y": 78.8
+        },
+        {
+          "x": 86.3,
+          "y": 78.7
+        }
+      ],
+      "pct_ratio": 36.3,
+      "pct_momentum": 28.7,
+      "strength_label": "weak",
+      "momentum_label": "fading",
+      "price": 294.0,
+      "price_change": -0.3,
+      "price_change_pct": -0.1
+    },
+    {
+      "symbol": "ZC",
+      "name": "Corn",
+      "short": "Corn",
+      "category": "grains",
+      "quadrant": "lagging",
+      "x": 79.1,
+      "y": 91.0,
+      "tail": [
+        {
+          "x": 82.8,
+          "y": 94.5
+        },
+        {
+          "x": 83.1,
+          "y": 94.0
+        },
+        {
+          "x": 81.7,
+          "y": 92.6
+        },
+        {
+          "x": 79.2,
+          "y": 91.6
+        },
+        {
+          "x": 79.1,
+          "y": 91.0
+        }
+      ],
+      "pct_ratio": 29.1,
+      "pct_momentum": 41.0,
+      "strength_label": "weak",
+      "momentum_label": "steady",
+      "price": 427.5,
+      "price_change": -0.75,
+      "price_change_pct": -0.18
+    },
+    {
+      "symbol": "LE",
+      "name": "Live Cattle",
+      "short": "Cattle",
+      "category": "livestock",
+      "quadrant": "lagging",
+      "x": 71.5,
+      "y": 50.0,
+      "tail": [
+        {
+          "x": 74.3,
+          "y": 50.0
+        },
+        {
+          "x": 73.4,
+          "y": 50.0
+        },
+        {
+          "x": 72.9,
+          "y": 50.0
+        },
+        {
+          "x": 72.0,
+          "y": 50.0
+        },
+        {
+          "x": 71.5,
+          "y": 50.0
+        }
+      ],
+      "pct_ratio": 21.5,
+      "pct_momentum": 0.0,
+      "strength_label": "weak",
+      "momentum_label": "fading",
+      "price": 237.4,
+      "price_change": 1.38,
+      "price_change_pct": 0.58
+    },
+    {
+      "symbol": "ZS",
+      "name": "Soybeans",
+      "short": "Soy",
+      "category": "grains",
+      "quadrant": "lagging",
+      "x": 71.1,
+      "y": 74.7,
+      "tail": [
+        {
+          "x": 82.4,
+          "y": 80.4
+        },
+        {
+          "x": 80.6,
+          "y": 79.8
+        },
+        {
+          "x": 77.7,
+          "y": 79.3
+        },
+        {
+          "x": 73.6,
+          "y": 78.8
+        },
+        {
+          "x": 71.1,
+          "y": 74.7
+        }
+      ],
+      "pct_ratio": 21.1,
+      "pct_momentum": 24.7,
+      "strength_label": "weak",
+      "momentum_label": "fading",
+      "price": 1073.0,
+      "price_change": 11.25,
+      "price_change_pct": 1.06
+    },
+    {
+      "symbol": "HO",
+      "name": "Heating Oil",
+      "short": "Heat",
+      "category": "energy",
+      "quadrant": "lagging",
+      "x": 69.5,
+      "y": 51.6,
+      "tail": [
+        {
+          "x": 71.1,
+          "y": 50.8
+        },
+        {
+          "x": 70.6,
+          "y": 50.8
+        },
+        {
+          "x": 70.5,
+          "y": 51.6
+        },
+        {
+          "x": 70.0,
+          "y": 52.4
+        },
+        {
+          "x": 69.5,
+          "y": 51.6
+        }
+      ],
+      "pct_ratio": 19.5,
+      "pct_momentum": 1.6,
+      "strength_label": "very_weak",
+      "momentum_label": "fading",
+      "price": 2.42,
+      "price_change": -0.15,
+      "price_change_pct": -5.82
+    },
+    {
+      "symbol": "ZL",
+      "name": "Soybean Oil",
+      "short": "SoyOil",
+      "category": "grains",
+      "quadrant": "lagging",
+      "x": 60.4,
+      "y": 53.2,
+      "tail": [
+        {
+          "x": 60.9,
+          "y": 50.4
+        },
+        {
+          "x": 60.9,
+          "y": 50.8
+        },
+        {
+          "x": 60.8,
+          "y": 51.2
+        },
+        {
+          "x": 60.4,
+          "y": 50.4
+        },
+        {
+          "x": 60.4,
+          "y": 53.2
+        }
+      ],
+      "pct_ratio": 10.4,
+      "pct_momentum": 3.2,
+      "strength_label": "very_weak",
+      "momentum_label": "fading",
+      "price": 54.79,
+      "price_change": 0.9,
+      "price_change_pct": 1.67
+    },
+    {
+      "symbol": "CL",
+      "name": "WTI Crude Oil",
+      "short": "Crude",
+      "category": "energy",
+      "quadrant": "lagging",
+      "x": 50.0,
+      "y": 53.6,
+      "tail": [
+        {
+          "x": 50.0,
+          "y": 55.3
+        },
+        {
+          "x": 50.0,
+          "y": 54.8
+        },
+        {
+          "x": 50.0,
+          "y": 55.2
+        },
+        {
+          "x": 50.0,
+          "y": 52.8
+        },
+        {
+          "x": 50.0,
+          "y": 53.6
+        }
+      ],
+      "pct_ratio": 0.0,
+      "pct_momentum": 3.6,
+      "strength_label": "very_weak",
+      "momentum_label": "fading",
+      "price": 62.82,
+      "price_change": 2.19,
+      "price_change_pct": 3.61
+    },
+    {
+      "symbol": "BZ",
+      "name": "Brent Crude",
+      "short": "Brent",
+      "category": "energy",
+      "quadrant": "lagging",
+      "x": 50.0,
+      "y": 50.0,
+      "tail": [
+        {
+          "x": 50.0,
+          "y": 50.8
+        },
+        {
+          "x": 50.0,
+          "y": 50.0
+        },
+        {
+          "x": 50.0,
+          "y": 50.0
+        },
+        {
+          "x": 50.0,
+          "y": 50.0
+        },
+        {
+          "x": 50.0,
+          "y": 50.0
+        }
+      ],
+      "pct_ratio": 0.0,
+      "pct_momentum": 0.0,
+      "strength_label": "very_weak",
+      "momentum_label": "fading",
+      "price": 66.96,
+      "price_change": 1.37,
+      "price_change_pct": 2.09
+    },
+    {
+      "symbol": "ZW",
+      "name": "Wheat",
+      "short": "Wheat",
+      "category": "grains",
+      "quadrant": "lagging",
+      "x": 50.0,
+      "y": 53.6,
+      "tail": [
+        {
+          "x": 50.0,
+          "y": 60.5
+        },
+        {
+          "x": 50.0,
+          "y": 60.5
+        },
+        {
+          "x": 50.0,
+          "y": 58.4
+        },
+        {
+          "x": 50.0,
+          "y": 54.0
+        },
+        {
+          "x": 50.0,
+          "y": 53.6
+        }
+      ],
+      "pct_ratio": 0.0,
+      "pct_momentum": 3.6,
+      "strength_label": "very_weak",
+      "momentum_label": "fading",
+      "price": 525.75,
+      "price_change": 3.25,
+      "price_change_pct": 0.62
+    },
+    {
+      "symbol": "SB",
+      "name": "Sugar",
+      "short": "Sugar",
+      "category": "softs",
+      "quadrant": "lagging",
+      "x": 50.0,
+      "y": 58.8,
+      "tail": [
+        {
+          "x": 50.0,
+          "y": 64.2
+        },
+        {
+          "x": 50.0,
+          "y": 63.7
+        },
+        {
+          "x": 50.0,
+          "y": 60.8
+        },
+        {
+          "x": 50.0,
+          "y": 58.8
+        },
+        {
+          "x": 50.0,
+          "y": 58.8
+        }
+      ],
+      "pct_ratio": 0.0,
+      "pct_momentum": 8.8,
+      "strength_label": "very_weak",
+      "momentum_label": "fading",
+      "price": 14.83,
+      "price_change": 0.04,
+      "price_change_pct": 0.27
+    },
+    {
+      "symbol": "CC",
+      "name": "Cocoa",
+      "short": "Cocoa",
+      "category": "softs",
+      "quadrant": "lagging",
+      "x": 50.0,
+      "y": 63.5,
+      "tail": [
+        {
+          "x": 50.0,
+          "y": 68.2
+        },
+        {
+          "x": 50.0,
+          "y": 67.7
+        },
+        {
+          "x": 50.0,
+          "y": 66.5
+        },
+        {
+          "x": 50.0,
+          "y": 65.6
+        },
+        {
+          "x": 50.0,
+          "y": 63.5
+        }
+      ],
+      "pct_ratio": 0.0,
+      "pct_momentum": 13.5,
+      "strength_label": "very_weak",
+      "momentum_label": "fading",
+      "price": 4420.0,
+      "price_change": 72.0,
+      "price_change_pct": 1.66
+    },
+    {
+      "symbol": "CT",
+      "name": "Cotton",
+      "short": "Cotton",
+      "category": "softs",
+      "quadrant": "lagging",
+      "x": 50.0,
+      "y": 50.0,
+      "tail": [
+        {
+          "x": 50.0,
+          "y": 50.0
+        },
+        {
+          "x": 50.0,
+          "y": 50.0
+        },
+        {
+          "x": 50.0,
+          "y": 50.0
+        },
+        {
+          "x": 50.0,
+          "y": 50.0
+        },
+        {
+          "x": 50.0,
+          "y": 50.0
+        }
+      ],
+      "pct_ratio": 0.0,
+      "pct_momentum": 0.0,
+      "strength_label": "very_weak",
+      "momentum_label": "fading",
+      "price": 63.04,
+      "price_change": 0.07,
+      "price_change_pct": 0.11
+    },
+    {
+      "symbol": "HE",
+      "name": "Lean Hogs",
+      "short": "Hogs",
+      "category": "livestock",
+      "quadrant": "lagging",
+      "x": 50.0,
+      "y": 65.5,
+      "tail": [
+        {
+          "x": 50.0,
+          "y": 63.4
+        },
+        {
+          "x": 50.0,
+          "y": 63.7
+        },
+        {
+          "x": 50.0,
+          "y": 64.5
+        },
+        {
+          "x": 50.0,
+          "y": 64.8
+        },
+        {
+          "x": 50.0,
+          "y": 65.5
+        }
+      ],
+      "pct_ratio": 0.0,
+      "pct_momentum": 15.5,
+      "strength_label": "very_weak",
+      "momentum_label": "fading",
+      "price": 97.03,
+      "price_change": 8.72,
+      "price_change_pct": 9.88
+    }
+  ],
+  "term_structure": {
+    "status": "coming_soon",
+    "message": "Term structure analysis coming soon"
+  },
+  "display_settings": {
+    "show_prices": true,
+    "show_percentages": true
+  }
+}
